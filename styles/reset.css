@@ -1,0 +1,91 @@
+/**
+ * Fantasy Music Player: CSS reset.
+ *
+ * Removes inconsistent browser defaults, sets the shared focus ring, and turns off animations
+ * for people who ask their system for reduced motion.
+ */
+
+/* ========== BOX SIZING ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ========== DOCUMENT ========== */
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  line-height: 1;
+}
+
+/* ========== TYPOGRAPHY ========== */
+h1,
+h2,
+h3,
+p,
+figure {
+  margin: 0;
+}
+
+/* ========== MEDIA ========== */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+/* ========== FORMS ========== */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  padding: 0;
+  border: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ========== ACCESSIBILITY ========== */
+/* Keeps the hidden attribute working on elements that set their own display value. */
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

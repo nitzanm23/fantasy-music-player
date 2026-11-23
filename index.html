@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+  <!--
+    Fantasy Music Player: mobile music app (portfolio demo).
+    Sections: Opening screen, Home, Player (mini bar and full screen), Playlist drawer, About sheet.
+    The playlist drawer is filled from scripts/data.js by scripts/app.js.
+  -->
+
+  <head>
+    <!-- Basic Meta -->
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Fantasy Music Player is a mobile-first music app demo with a mini player, full-screen player, playlist, shuffle, repeat, and lock-screen controls."
+    />
+    <meta name="theme-color" content="#141414" />
+
+    <title>Fantasy Music Player | Mobile Music App Demo</title>
+
+    <link rel="icon" href="./assets/icons/favicon.ico" type="image/x-icon" />
+    <link
+      rel="canonical"
+      href="https://nitzanm23.github.io/fantasy-music-player/"
+    />
+
+    <!-- Home screen install (Android, iOS) -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Fantasy Music" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+
+    <!-- Social sharing preview (LinkedIn, Slack, WhatsApp, X); these require absolute URLs -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Fantasy Music Player" />
+    <meta
+      property="og:title"
+      content="Fantasy Music Player | Mobile Music App Demo"
+    />
+    <meta
+      property="og:description"
+      content="Fantasy Music Player is a mobile-first music app demo with a mini player, full-screen player, playlist, shuffle, repeat, and lock-screen controls."
+    />
+    <meta
+      property="og:url"
+      content="https://nitzanm23.github.io/fantasy-music-player/"
+    />
+    <meta
+      property="og:image"
+      content="https://nitzanm23.github.io/fantasy-music-player/assets/images/og-image.jpg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Fantasy Music Player home screen, full-screen player, and playlist on a phone"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Opening screen: must run before first paint, so no defer -->
+    <script src="./scripts/page-loader.js"></script>
+
+    <!-- Self-hosted font (vendor/) -->
+    <link
+      rel="preload"
+      href="./vendor/fonts/fredoka-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="./vendor/fonts/fonts.css" />
+
+    <!-- Project styles -->
+    <link rel="stylesheet" href="./styles/tokens.css" />
+    <link rel="stylesheet" href="./styles/reset.css" />
+    <link rel="stylesheet" href="./styles/page-loader.css" />
+    <link rel="stylesheet" href="./styles/index.css" />
+
+    <!-- Project scripts -->
+    <script src="./scripts/data.js" defer></script>
+    <script src="./scripts/demo-notice.js" defer></script>
+    <script src="./scripts/app.js" defer></script>
+  </head>
+
+  <body>
+    <!-- ========== OPENING SCREEN ========== -->
+    <div class="page-loader" aria-hidden="true">
+      <img
+        src="./assets/logos/logo.svg"
+        class="page-loader__logo u-shadow-black"
+        alt=""
+        width="384"
+        height="167"
+        draggable="false"
+      />
+    </div>
+
+    <main class="app-root">
+      <audio class="player__audio" preload="metadata"></audio>
+
+      <!-- ========== HOME ========== -->
+      <div class="home">
+        <header class="home__header">
+          <img
+            src="./assets/logos/logo.svg"
+            class="home__logo"
+            alt=""
+            width="54"
+            height="54"
+            draggable="false"
+          />
+
+          <div class="home__intro">
+            <p class="home__eyebrow">Your daily sound experience</p>
+            <h1 class="home__title">Fantasy Music Player</h1>
+          </div>
+
+          <button
+            class="icon-button home__about-button"
+            type="button"
+            aria-haspopup="dialog"
+            aria-controls="about-sheet"
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#circle-info" />
+            </svg>
+            <span class="sr-only">About this app</span>
+          </button>
+        </header>
+
+        <section class="hero-carousel" aria-label="Featured">
+          <img
+            src="./assets/images/featured/daybreak.webp"
+            class="hero-carousel__image is-active"
+            alt=""
+            width="900"
+            height="400"
+            draggable="false"
+            fetchpriority="high"
+          />
+          <img
+            src="./assets/images/featured/syntheticity.webp"
+            class="hero-carousel__image"
+            alt=""
+            width="900"
+            height="400"
+            draggable="false"
+          />
+          <img
+            src="./assets/images/featured/lost-islands.webp"
+            class="hero-carousel__image"
+            alt=""
+            width="900"
+            height="400"
+            draggable="false"
+          />
+          <img
+            src="./assets/images/featured/familiar-roads.webp"
+            class="hero-carousel__image"
+            alt=""
+            width="900"
+            height="400"
+            draggable="false"
+          />
+          <img
+            src="./assets/images/featured/destiny.webp"
+            class="hero-carousel__image"
+            alt=""
+            width="900"
+            height="400"
+            draggable="false"
+          />
+
+          <button
+            class="icon-button hero-carousel__toggle"
+            type="button"
+            aria-pressed="false"
+            hidden
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#pause" />
+            </svg>
+            <span class="sr-only">Pause slideshow</span>
+          </button>
+        </section>
+
+        <section class="playlist-row" aria-labelledby="recently-played-title">
+          <h2 class="playlist-row__title" id="recently-played-title">
+            Recently Played
+          </h2>
+
+          <ul class="playlist-row__list">
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/deep-focus.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Deep Focus</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/late-night-piano.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Late Night Piano</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/epic-scores.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Epic Scores</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/daily-mix.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Daily Mix</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/calm-waters.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Calm Waters</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+
+        <section class="playlist-row" aria-labelledby="made-for-you-title">
+          <h2 class="playlist-row__title" id="made-for-you-title">
+            Made For You
+          </h2>
+
+          <ul class="playlist-row__list">
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/road-trip.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Road Trip</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/game-night.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Game Night</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/morning-coffee.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Morning Coffee</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/after-hours.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">After Hours</span>
+              </button>
+            </li>
+            <li>
+              <button
+                class="playlist-card"
+                type="button"
+                data-demo="this playlist"
+              >
+                <img
+                  src="./assets/images/playlists/fresh-finds.webp"
+                  class="playlist-card__image"
+                  alt=""
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+                <span class="playlist-card__title">Fresh Finds</span>
+              </button>
+            </li>
+          </ul>
+        </section>
+
+        <!-- The year is updated by scripts/app.js -->
+        <footer class="home__credit">
+          <p>Fictional music app · Portfolio demonstration</p>
+          <p>
+            &copy; <span class="home__year">2026</span> Fantasy Music Player.
+            Built by
+            <a
+              href="https://nm-dev.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#code" /></svg
+              >&nbsp;NM Dev.</a
+            >
+          </p>
+        </footer>
+      </div>
+
+      <!-- ========== PLAYER ========== -->
+      <section class="player" aria-label="Now playing">
+        <!-- Mini bar: always visible while the full-screen player is closed -->
+        <div class="player__mini">
+          <button
+            class="player__expand-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="player-full"
+          >
+            <img
+              src="./assets/images/covers/daybreak.webp"
+              class="player__mini-cover"
+              data-song="cover"
+              alt=""
+              width="600"
+              height="600"
+              draggable="false"
+            />
+            <span class="player__mini-text">
+              <span class="player__mini-title" data-song="name">Daybreak</span>
+              <span class="player__mini-artist" data-song="artist"
+                >Tanner Helland</span
+              >
+            </span>
+            <span class="sr-only">, open player</span>
+          </button>
+
+          <button
+            class="icon-button player__mini-toggle"
+            type="button"
+            data-action="toggle"
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#play" />
+            </svg>
+            <span class="sr-only">Play</span>
+          </button>
+
+          <noscript>
+            <p class="player__noscript">Turn on JavaScript to play music.</p>
+          </noscript>
+
+          <div class="player__mini-progress" aria-hidden="true"></div>
+        </div>
+
+        <!-- Full-screen player -->
+        <div class="player__full" id="player-full">
+          <div class="player__top-bar">
+            <button class="icon-button player__collapse-button" type="button">
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#chevron-left" />
+              </svg>
+              <span class="sr-only">Close player</span>
+            </button>
+
+            <p class="player__label">Now playing</p>
+
+            <button
+              class="icon-button player__queue-button"
+              type="button"
+              aria-expanded="false"
+              aria-controls="playlist-drawer"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#grid" />
+              </svg>
+              <span class="sr-only">Playlist</span>
+            </button>
+          </div>
+
+          <img
+            src="./assets/images/covers/daybreak.webp"
+            class="player__cover"
+            data-song="cover"
+            alt=""
+            width="600"
+            height="600"
+            draggable="false"
+          />
+
+          <div class="player__meta">
+            <h2 class="player__title" data-song="name">Daybreak</h2>
+            <p class="player__artist" data-song="artist">Tanner Helland</p>
+          </div>
+
+          <div class="player__seek">
+            <input
+              class="range player__seek-bar"
+              type="range"
+              min="0"
+              max="0"
+              step="any"
+              value="0"
+              aria-label="Seek"
+            />
+            <div class="player__times" aria-hidden="true">
+              <span class="player__current-time">0:00</span>
+              <span class="player__duration">0:00</span>
+            </div>
+          </div>
+
+          <div class="player__controls">
+            <button
+              class="icon-button player__mode-button"
+              type="button"
+              data-action="shuffle"
+              aria-pressed="false"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#shuffle" />
+              </svg>
+              <span class="sr-only">Shuffle</span>
+            </button>
+
+            <button
+              class="icon-button player__skip-button"
+              type="button"
+              data-action="previous"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#backward" />
+              </svg>
+              <span class="sr-only">Previous track</span>
+            </button>
+
+            <button
+              class="icon-button player__play-button"
+              type="button"
+              data-action="toggle"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#play" />
+              </svg>
+              <span class="sr-only">Play</span>
+            </button>
+
+            <button
+              class="icon-button player__skip-button"
+              type="button"
+              data-action="next"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#forward" />
+              </svg>
+              <span class="sr-only">Next track</span>
+            </button>
+
+            <button
+              class="icon-button player__mode-button"
+              type="button"
+              data-action="repeat"
+              aria-pressed="false"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#repeat" />
+              </svg>
+              <span class="sr-only">Repeat track</span>
+            </button>
+          </div>
+
+          <!-- Hidden by app.js on iOS, where web pages cannot change the volume -->
+          <div class="player__volume">
+            <button
+              class="icon-button player__mute-button"
+              type="button"
+              aria-pressed="false"
+            >
+              <svg class="icon" aria-hidden="true" focusable="false">
+                <use href="./assets/icons/icons.svg#volume-high" />
+              </svg>
+              <span class="sr-only">Mute</span>
+            </button>
+            <input
+              class="range player__volume-bar"
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value="1"
+              aria-label="Volume"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PLAYLIST DRAWER ========== -->
+      <section
+        class="playlist-drawer"
+        id="playlist-drawer"
+        aria-labelledby="playlist-title"
+      >
+        <div class="playlist-drawer__header">
+          <button
+            class="icon-button playlist-drawer__close-button"
+            type="button"
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#chevron-left" />
+            </svg>
+            <span class="sr-only">Back to player</span>
+          </button>
+          <h2 class="playlist-drawer__title" id="playlist-title">Playlist</h2>
+        </div>
+
+        <!-- Filled from window.SONGS (scripts/data.js) -->
+        <ol class="playlist-drawer__list"></ol>
+      </section>
+    </main>
+
+    <!-- ========== ABOUT SHEET ========== -->
+    <dialog class="about-sheet" id="about-sheet" aria-labelledby="about-title">
+      <button class="icon-button about-sheet__close-button" type="button">
+        <svg class="icon" aria-hidden="true" focusable="false">
+          <use href="./assets/icons/icons.svg#xmark" />
+        </svg>
+        <span class="sr-only">Close</span>
+      </button>
+
+      <img
+        src="./assets/icons/icon-192.png"
+        class="about-sheet__icon"
+        alt=""
+        width="192"
+        height="192"
+        loading="lazy"
+      />
+      <h2 class="about-sheet__title" id="about-title">Fantasy Music Player</h2>
+      <p class="about-sheet__version">
+        Fictional music app · Portfolio demonstration
+      </p>
+
+      <p class="about-sheet__author">
+        <svg class="icon" aria-hidden="true" focusable="false">
+          <use href="./assets/icons/icons.svg#code" />
+        </svg>
+        NM Dev · Nitzan Mizrachi
+      </p>
+      <p class="about-sheet__text">
+        Designed and built with HTML, CSS, and vanilla JavaScript.
+      </p>
+
+      <ul class="about-sheet__links">
+        <li>
+          <a
+            href="https://nm-dev.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#globe" />
+            </svg>
+            Portfolio
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://github.com/nitzanm23/fantasy-music-player"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#github" />
+            </svg>
+            Source code
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://www.linkedin.com/in/nitzan-mizrachi/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="icon" aria-hidden="true" focusable="false">
+              <use href="./assets/icons/icons.svg#linkedin-in" />
+            </svg>
+            LinkedIn
+          </a>
+        </li>
+      </ul>
+
+      <p class="about-sheet__note">
+        Music by Tanner Helland (<a
+          href="https://creativecommons.org/licenses/by/4.0/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >CC BY 4.0</a
+        >). Cover art made for this app. Playlists are sample content; full
+        credits are in the project README.
+      </p>
+    </dialog>
+  </body>
+</html>

@@ -1,0 +1,887 @@
+/**
+ * Fantasy Music Player: app layout and components.
+ *
+ * The app is a phone-sized column (max 425px) centered on larger screens. The home screen
+ * scrolls on its own, while the player and the playlist drawer are layers inside the same
+ * column: the player grows from a mini bar into a full screen, and the drawer slides in over it.
+ */
+
+/* ========== UTILITIES ========== */
+.u-shadow-black {
+  filter: var(--drop-shadow-black);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+/* ========== GLOBAL ========== */
+html {
+  display: flex;
+  justify-content: center;
+  background: var(--color-background);
+}
+
+body {
+  position: relative;
+  width: 100%;
+  max-width: var(--app-width);
+  min-height: 100dvh;
+  overflow: hidden;
+  color: var(--color-text);
+  background: var(--gradient-app);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Native-app look: rows scroll by touch or trackpad without visible scrollbars. */
+* {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+.icon-button {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1.375rem;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.icon-button:active {
+  transform: scale(0.92);
+}
+
+@media (hover: hover) {
+  .icon-button:hover {
+    background: var(--color-surface);
+  }
+}
+
+/* ========== APP SHELL ========== */
+/*
+ * overflow: clip, not hidden. A hidden container can still be scrolled by focus(), which would
+ * shift the whole app sideways when focus moves into the sliding drawer.
+ */
+.app-root {
+  position: relative;
+  height: 100dvh;
+  overflow: clip;
+}
+
+/* ========== HOME ========== */
+.home {
+  height: 100%;
+  padding: calc(var(--safe-top) + clamp(15px, 4vw, 20px)) clamp(15px, 4vw, 20px)
+    calc(var(--mini-player-height) + var(--safe-bottom) + var(--space-6));
+  overflow-y: auto;
+}
+
+.home__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.home__logo {
+  width: 54px;
+  height: 54px;
+  filter: invert(100%);
+}
+
+.home__eyebrow {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  text-transform: capitalize;
+}
+
+.home__title {
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: var(--font-weight-semibold);
+}
+
+.home__about-button {
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+
+.home__credit {
+  margin-top: var(--space-8);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.home__credit p + p {
+  margin-top: var(--space-1);
+}
+
+/* Same credit-link style as the footers of the other Fantasy projects: icon, no underline. */
+.home__credit a {
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.home__credit a:hover {
+  color: var(--color-primary);
+}
+
+.home__credit .icon {
+  display: inline-block;
+  vertical-align: -0.125em;
+}
+
+/* ========== HERO CAROUSEL ========== */
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  height: clamp(160px, 44vw, 215px);
+  overflow: hidden;
+  border: 1px solid var(--color-surface-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-carousel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+.hero-carousel__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.03);
+  transition:
+    opacity var(--transition-slow),
+    transform var(--transition-slow);
+}
+
+.hero-carousel__image.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero-carousel__toggle {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  background: var(--color-alpha);
+  font-size: 0.875rem;
+}
+
+/* ========== PLAYLIST ROW ========== */
+.playlist-row__title {
+  margin: 30px 0 10px;
+  font-size: clamp(24px, 5vw, 30px);
+  font-weight: var(--font-weight-regular);
+}
+
+/* The padding leaves room for focus rings, which overflow: auto would otherwise clip. */
+.playlist-row__list {
+  display: flex;
+  gap: 20px;
+  margin-inline: -6px;
+  padding: 6px;
+  overflow-x: auto;
+  scroll-padding-inline: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.playlist-row__list > li {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.playlist-card {
+  display: block;
+  width: clamp(120px, 30vw, 150px);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.playlist-card__image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid var(--color-surface-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.playlist-card:active .playlist-card__image {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) {
+  .playlist-card:hover .playlist-card__image {
+    opacity: 0.88;
+    transform: translateY(-4px) scale(1.02);
+  }
+}
+
+.playlist-card__title {
+  display: block;
+  padding: 5px;
+  font-size: clamp(16px, 4vw, 20px);
+  line-height: 1.15;
+}
+
+/* ========== RANGE INPUTS (seek, volume) ========== */
+/* app.js sets --fill (0%–100%) so the played part of the track is drawn in the accent color. */
+.range {
+  --fill: 0%;
+  --track: linear-gradient(
+    to right,
+    var(--color-primary) var(--fill),
+    var(--color-surface-strong) var(--fill)
+  );
+
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--track);
+}
+
+.range::-moz-range-track {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--track);
+}
+
+.range::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--color-text);
+  appearance: none;
+}
+
+.range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-text);
+}
+
+/* ========== PLAYER ========== */
+.player {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-player);
+  height: calc(var(--mini-player-height) + var(--safe-bottom));
+  overflow: clip;
+  background: var(--gradient-player);
+  backdrop-filter: var(--blur-glass);
+  border-top: 1px solid var(--color-surface-strong);
+  transition: height var(--transition-base);
+}
+
+.player.is-expanded {
+  height: 100%;
+}
+
+/* --- Mini bar --- */
+.player__mini {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--mini-player-height);
+  padding-inline: var(--space-3);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
+}
+
+.player.is-expanded .player__mini {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.player:not(.is-expanded) .player__mini {
+  transition:
+    opacity var(--transition-fast),
+    visibility 0s;
+}
+
+.player__expand-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.player__mini-cover {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.player__mini-text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.player__mini-title,
+.player__mini-artist {
+  overflow: hidden;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player__mini-title {
+  font-size: 1.0625rem;
+  font-weight: var(--font-weight-regular);
+}
+
+.player__mini-artist {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.player__mini-toggle {
+  font-size: 1.5rem;
+}
+
+/* app.js sets --progress (0–1). */
+.player__mini-progress {
+  --progress: 0;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--color-surface);
+}
+
+.player__mini-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  transform: scaleX(var(--progress));
+  transform-origin: left;
+}
+
+/* Without JavaScript nothing can play, so the play button gives way to a short message. */
+html:not(.has-js) .player__mini-toggle {
+  display: none;
+}
+
+.player__noscript {
+  padding-right: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  text-align: right;
+}
+
+/* --- Full screen --- */
+.player__full {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-top) + var(--space-4)) var(--space-6)
+    calc(var(--safe-bottom) + var(--space-6));
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-base),
+    visibility var(--transition-base);
+}
+
+.player.is-expanded .player__full {
+  opacity: 1;
+  visibility: visible;
+  /* Visible at once (no delay), so app.js can move focus into it right away. */
+  transition:
+    opacity var(--transition-base),
+    visibility 0s;
+}
+
+.player__top-bar {
+  display: grid;
+  grid-template-columns: var(--tap-target) 1fr var(--tap-target);
+  align-items: center;
+  margin-inline: calc(var(--space-2) * -1);
+}
+
+.player__label {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.player__cover {
+  flex-shrink: 0;
+  width: min(100%, 38dvh, 320px);
+  height: auto;
+  aspect-ratio: 1;
+  margin: auto;
+  padding-block: var(--space-4);
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-sizing: content-box;
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.5));
+}
+
+.player__meta {
+  text-align: center;
+}
+
+.player__title {
+  overflow: hidden;
+  font-size: clamp(26px, 7vw, 34px);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player__artist {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+}
+
+.player__seek {
+  margin-top: var(--space-6);
+}
+
+.player__times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.player__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+}
+
+.player__skip-button {
+  width: 56px;
+  height: 56px;
+  font-size: 1.875rem;
+}
+
+.player__play-button {
+  width: 72px;
+  height: 72px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 1.75rem;
+  box-shadow: 0 10px 30px rgba(99, 255, 105, 0.25);
+}
+
+@media (hover: hover) {
+  .player__play-button:hover {
+    background: var(--color-primary);
+    transform: scale(1.05);
+  }
+}
+
+/* Shuffle and repeat: on = accent color plus a dot, so the state never relies on color alone. */
+.player__mode-button {
+  position: relative;
+  color: var(--color-text-muted);
+  font-size: 1.25rem;
+}
+
+.player__mode-button[aria-pressed="true"] {
+  color: var(--color-primary);
+}
+
+.player__mode-button[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.player__volume {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  margin-left: calc(var(--space-2) * -1);
+}
+
+.player__mute-button {
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+}
+
+/* ========== PLAYLIST DRAWER ========== */
+.playlist-drawer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-playlist);
+  padding: calc(var(--safe-top) + var(--space-4)) 0
+    calc(var(--safe-bottom) + var(--space-6));
+  overflow-y: auto;
+  background: var(--gradient-app);
+  background-color: var(--color-background);
+  visibility: hidden;
+  transform: translateX(100%);
+  transition:
+    transform var(--transition-base),
+    visibility var(--transition-base);
+}
+
+.playlist-drawer.is-open {
+  visibility: visible;
+  transform: none;
+  transition:
+    transform var(--transition-base),
+    visibility 0s;
+}
+
+.playlist-drawer__header {
+  display: grid;
+  grid-template-columns: var(--tap-target) 1fr var(--tap-target);
+  align-items: center;
+  margin-bottom: var(--space-4);
+  padding-inline: var(--space-4);
+}
+
+.playlist-drawer__title {
+  font-size: clamp(28px, 8vw, 36px);
+  font-weight: var(--font-weight-regular);
+  text-align: center;
+}
+
+.queue-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 76px;
+  padding: var(--space-2) var(--space-6);
+  border-top: 1px solid var(--color-alpha);
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.queue-card:focus-visible {
+  outline-offset: -3px;
+}
+
+.queue-card.is-current {
+  background: var(--color-surface);
+}
+
+@media (hover: hover) {
+  .queue-card:hover {
+    background: var(--color-surface);
+  }
+}
+
+.queue-card__cover {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.queue-card__text {
+  display: grid;
+  flex: 1;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.queue-card__name {
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-regular);
+}
+
+.queue-card.is-current .queue-card__name {
+  color: var(--color-primary);
+}
+
+.queue-card__artist {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Equalizer bars on the current track; they move only while music plays. */
+.queue-card__equalizer {
+  display: none;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+}
+
+.queue-card.is-current .queue-card__equalizer {
+  display: flex;
+}
+
+.queue-card__equalizer span {
+  width: 3px;
+  height: 40%;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+.is-playing .queue-card__equalizer span {
+  animation: equalizer 0.9s ease-in-out infinite alternate;
+}
+
+.is-playing .queue-card__equalizer span:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.is-playing .queue-card__equalizer span:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+@keyframes equalizer {
+  from {
+    height: 25%;
+  }
+
+  to {
+    height: 100%;
+  }
+}
+
+/* ========== DEMO NOTICE ========== */
+/* Message shown by demo-notice.js when a control has no content behind it. */
+.demo-notice {
+  position: fixed;
+  bottom: calc(var(--mini-player-height) + var(--safe-bottom) + var(--space-4));
+  left: 50%;
+  z-index: var(--z-notice);
+  max-width: min(90vw, 24rem);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.3;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 12px);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.demo-notice.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* ========== ABOUT SHEET ========== */
+/* A native <dialog> opened with showModal(): focus trap, Escape, and inert background built in. */
+.about-sheet {
+  width: 100%;
+  max-width: var(--app-width);
+  max-height: 90dvh;
+  margin: auto auto 0;
+  padding: var(--space-8) var(--space-6)
+    calc(var(--safe-bottom) + var(--space-6));
+  border: 0;
+  border-top: 1px solid var(--color-surface-strong);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: #1b1b1b;
+  color: var(--color-text);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-light);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.about-sheet[open] {
+  animation: sheet-up var(--transition-base) ease-out;
+}
+
+.about-sheet::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.about-sheet__close-button {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.about-sheet__icon {
+  width: 72px;
+  height: 72px;
+  margin-inline: auto;
+  border: 1px solid var(--color-surface-strong);
+  border-radius: var(--radius-md);
+}
+
+.about-sheet__title {
+  margin-top: var(--space-3);
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+}
+
+.about-sheet__version {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.about-sheet__author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  font-weight: var(--font-weight-semibold);
+}
+
+.about-sheet__text {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.about-sheet__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.about-sheet__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: var(--font-weight-regular);
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .about-sheet__links a:hover {
+    background: var(--color-surface-strong);
+  }
+}
+
+.about-sheet__note {
+  margin-top: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.about-sheet__note a {
+  color: var(--color-text);
+  text-underline-offset: 3px;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}

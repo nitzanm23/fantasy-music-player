@@ -59,6 +59,7 @@ The original player follows the Modern Web music player tutorial credited below.
 - **Clear button states:** Play/Pause is one button whose label changes with the state. Shuffle, repeat, and mute use `aria-pressed`, and an active mode shows a dot as well as a color.
 - **Motion that respects people:** The featured slideshow has a pause button (WCAG 2.2.2), pauses on hover, and does not move at all with `prefers-reduced-motion`.
 - **Original artwork:** Every cover, playlist tile, and featured banner was made for this project as a code-drawn SVG scene and exported to WebP (about 0.3 MB in total). The font is self-hosted, and the 17 icons ship as one SVG sprite instead of a full icon font.
+- **Defensive saved settings:** Each saved value is checked on load, so a missing, out-of-range, or hand-edited value falls back to its default instead of stopping playback. The data lives under a versioned key (`fantasy-music-player:v1`), so a future change to its shape can ship as `v2`.
 - **Works without JavaScript:** The opening screen never blocks the page, and a short message replaces the play button.
 
 ---

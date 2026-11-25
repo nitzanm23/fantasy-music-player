@@ -13,7 +13,7 @@
     CAROUSEL_INTERVAL_MS: 3000,
     RESTART_THRESHOLD_S: 3, // "Previous" restarts the track if it has played longer than this
     SEEK_STEP_S: 10, // lock-screen and headset seek buttons
-    STORAGE_KEY: "fantasy-music-player",
+    STORAGE_KEY: "fantasy-music-player:v1", // name:version; bump v1 if the saved shape changes
     ICON_SPRITE: "./assets/icons/icons.svg",
   });
 
@@ -99,9 +99,29 @@
   }
 
   // --- Saved Settings ---
+  // Saved values are checked one by one: a value that is missing, out of range, or edited by hand
+  // falls back to its default instead of breaking playback.
   function loadSettings() {
     try {
-      return JSON.parse(window.localStorage.getItem(CONFIG.STORAGE_KEY)) ?? {};
+      const saved = JSON.parse(window.localStorage.getItem(CONFIG.STORAGE_KEY));
+      if (typeof saved !== "object" || saved === null) return {};
+      return {
+        index:
+          Number.isInteger(saved.index) &&
+          saved.index >= 0 &&
+          saved.index < SONGS.length
+            ? saved.index
+            : 0,
+        shuffle: saved.shuffle === true,
+        repeat: saved.repeat === true,
+        volume:
+          Number.isFinite(saved.volume) &&
+          saved.volume >= 0 &&
+          saved.volume <= 1
+            ? saved.volume
+            : 1,
+        muted: saved.muted === true,
+      };
     } catch {
       return {}; // storage blocked (private mode) or corrupted: start with defaults
     }
@@ -498,7 +518,7 @@
     initCarousel();
 
     if (canSetVolume()) {
-      dom.audio.volume = Number.isFinite(saved.volume) ? saved.volume : 1;
+      dom.audio.volume = saved.volume ?? 1;
       dom.audio.muted = saved.muted === true;
     } else {
       dom.volume.hidden = true;
@@ -506,8 +526,7 @@
     if (saved.repeat === true) toggleRepeat();
     if (saved.shuffle === true) toggleShuffle();
 
-    const savedIndex = Number.isInteger(saved.index) ? saved.index : 0;
-    loadTrack(savedIndex);
+    loadTrack(saved.index ?? 0);
     renderPlayState();
     renderVolume();
     updateInert();
